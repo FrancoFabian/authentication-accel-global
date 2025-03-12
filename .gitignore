@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+# Ignorar claves privadas
+src/main/resources/keys/*.pem
