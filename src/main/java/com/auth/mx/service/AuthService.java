@@ -39,6 +39,7 @@ public class AuthService {
 
         User user = User.builder()
                 .email(request.getEmail())
+                .numberPhone(request.getNumberPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
                 // Set vacío de inicio, luego agregamos
                 .roles(new HashSet<>())
@@ -60,6 +61,7 @@ public class AuthService {
         // Retornar respuesta
         return AuthResponse.builder()
                 .email(user.getEmail())
+                .numberPhone(user.getNumberPhone())
                 .token(token)
                 .role(rolesEnTexto)
                 .build();
@@ -84,6 +86,7 @@ public class AuthService {
         if (user.isTwoFactorEnabled()) {
             return AuthResponse.builder()
                     .email(user.getEmail())
+                    .numberPhone(user.getNumberPhone())
                     .twoFactorRequired(true)  // nuevo flag
                     .build();
         }
@@ -99,6 +102,7 @@ public class AuthService {
         // Construir respuesta
         return AuthResponse.builder()
                 .email(user.getEmail())
+                .numberPhone(user.getNumberPhone())
                 .token(token)
                 .role(rolesEnTexto)
                 .build();

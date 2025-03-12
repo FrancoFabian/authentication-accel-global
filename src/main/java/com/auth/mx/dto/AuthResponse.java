@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class AuthResponse {
     private String token;
+    private String numberPhone;
     private String email;
     private boolean twoFactorRequired;
     private List<String> role;

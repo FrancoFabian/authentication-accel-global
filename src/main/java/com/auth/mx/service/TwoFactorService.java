@@ -2,13 +2,16 @@ package com.auth.mx.service;
 
 import com.auth.mx.dto.AuthResponse;
 import com.auth.mx.dto.Enable2FAResponse;
+import com.auth.mx.model.Role;
 import com.auth.mx.model.User;
 import com.auth.mx.model.UserTwoFactor;
 import com.auth.mx.repository.UserRepository;
 import com.auth.mx.repository.UserTwoFactorRepository;
 import com.auth.mx.security.JwtService;
 import com.auth.mx.util.TotpUtil;
+import com.bastiaanjansen.otp.TOTPGenerator;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.binary.Base32;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
@@ -21,6 +24,7 @@ public class TwoFactorService {
     private final UserRepository userRepository;
     private final TotpUtil totpUtil;
     private final JwtService jwtService;
+    private final WhatsAppService whatsAppService;
 
     public Enable2FAResponse enable2FA(Long userId, String method) {
         // Buscar el usuario
@@ -42,6 +46,17 @@ public class TwoFactorService {
 
         // Generar la URL de tipo "otpauth://..."
         String totpUrl = totpUtil.generateTOTPUrl(secret, "TuApp", user.getEmail());
+
+        // Si se selecciona el método WHATSAPP, enviar el código actual al número del usuario
+        if ("WHATSAPP".equalsIgnoreCase(method)) {
+            // Replicar la generación del código TOTP
+            Base32 base32 = new Base32();
+            byte[] secretBytes = base32.decode(secret);
+            TOTPGenerator generator = TOTPGenerator.withDefaultValues(secretBytes);
+            String currentCode = generator.now();
+            whatsAppService.sendWhatsAppMessage(user.getNumberPhone(),
+                    "Tu código de autenticación es: " + currentCode);
+        }
 
         return new Enable2FAResponse(totpUrl, secret);
     }
@@ -77,11 +92,12 @@ public class TwoFactorService {
 
         // 5) Construimos la respuesta (usando tu AuthResponse)
         var rolesEnTexto = user.getRoles().stream()
-                .map(r -> r.getNombre())
+                .map(Role::getNombre)
                 .collect(Collectors.toList());
 
         return AuthResponse.builder()
                 .email(user.getEmail())
+                .numberPhone(user.getNumberPhone())
                 .token(token)
                 .role(rolesEnTexto)
                 .twoFactorRequired(false)

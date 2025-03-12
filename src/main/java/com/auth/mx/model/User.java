@@ -29,6 +29,8 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String email;
 
+    private  String numberPhone;
+
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
